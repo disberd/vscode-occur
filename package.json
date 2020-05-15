@@ -23,68 +23,77 @@
   "contributes": {
     "commands": [
       {
-        "command": "multi-occur.RemoveSelections",
+        "command": "multi-occur.removeSelections",
         "title": "Multi Occur: Remove Selections"
       },
       {
-        "command": "multi-occur.ToggleOccurence",
+        "command": "multi-occur.toggleOccurence",
         "title": "Multi Occur: Toggle Occurrence"
       },
       {
-        "command": "multi-occur.NextOccurence",
+        "command": "multi-occur.prevOccurence",
+        "title": "Multi Occur: Previous Occurrence"
+      },
+      {
+        "command": "multi-occur.nextOccurence",
         "title": "Multi Occur: Next Occurrence"
       },
       {
-        "command": "multi-occur.RemoveOccurences",
+        "command": "multi-occur.removeOccurences",
         "title": "Multi Occur: Remove Occurrences"
       },
       {
-        "command": "multi-occur.CreateCursors",
+        "command": "multi-occur.createCursors",
         "title": "Multi Occur: Create Cursors"
       },
       {
-        "command": "multi-occur.FindOccurences",
+        "command": "multi-occur.findOccurences",
         "title": "Multi Occur: Find Occurences"
       },
       {
-        "command": "multi-occur.AddSelection",
+        "command": "multi-occur.addSelection",
         "title": "Multi Occur: Add Selections"
       }
     ],
     "keybindings": [
       {
         "key": "Escape",
-        "command": "multi-occur.RemoveSelections",
+        "command": "multi-occur.removeSelections",
         "when": "!editorHasMultipleSelections && multi-occur.active_region && !multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "Escape",
-        "command": "multi-occur.RemoveOccurences",
+        "command": "multi-occur.removeOccurences",
         "when": "!editorHasMultipleSelections && multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "Tab",
-        "command": "multi-occur.ToggleOccurence",
+        "command": "multi-occur.toggleOccurence",
+        "when": "multi-occur.active_occur && vim.mode == Normal"
+      },
+      {
+        "key": "shift+n",
+        "command": "multi-occur.prevOccurence",
         "when": "multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "n",
-        "command": "multi-occur.NextOccurence",
+        "command": "multi-occur.nextOccurence",
         "when": "multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "Enter",
-        "command": "multi-occur.CreateCursors",
+        "command": "multi-occur.createCursors",
         "when": "multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "Enter",
-        "command": "multi-occur.FindOccurences",
+        "command": "multi-occur.findOccurences",
         "when": "vim.mode == Visual"
       },
       {
         "key": "Shift+Space",
-        "command": "multi-occur.AddSelection",
+        "command": "multi-occur.addSelection",
         "when": "vim.mode == Visual || vim.mode == VisualLine"
       }
     ]

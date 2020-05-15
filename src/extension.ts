@@ -44,6 +44,41 @@ export function activate(context: vscode.ExtensionContext) {
     setSelecContext(true);
   }
 
+  // Function to move the cursor to the previous occurence
+  function prevOccurence(
+    textEditor: vscode.TextEditor,
+    textEditorEdit: vscode.TextEditorEdit
+  ) {
+    let doc = textEditor.document;
+    // Get the relevant DocVal array
+    let arr = docvals_vec[doc.fileName];
+    if (!arr.occurences.length) {
+      return;
+    }
+    // Find the offsets at the beginning of each occurrence
+    let endOffsets = arr.occurences.map(function (el) {
+      return doc.offsetAt(el.start);
+    });
+    // offset at active cursor
+    let currOffset = doc.offsetAt(textEditor.selection.active);
+    // Find the index of the next occurence
+    let occurIdx = endOffsets.reverse().findIndex(function (val) {
+      return val < currOffset;
+    });
+    if (occurIdx == -1) {
+      occurIdx = 0;
+    }
+    // Invert the index as we computed it reversing the array
+    occurIdx = endOffsets.length - 1 - occurIdx
+    // Move the cursor to the beginning of the next occurence
+    textEditor.selection = new vscode.Selection(
+      arr.occurences[occurIdx].start,
+      arr.occurences[occurIdx].start
+	);
+	// Move the editor view if next occurrence is not visible
+	textEditor.revealRange(arr.occurences[occurIdx])
+  }
+
   // Function to move the cursor to the next occurence
   function nextOccurence(
     textEditor: vscode.TextEditor,
@@ -212,31 +247,35 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerTextEditorCommand(
-      "multi-occur.RemoveSelections",
+      "multi-occur.removeSelections",
       removeSelections
     ),
     vscode.commands.registerTextEditorCommand(
-      "multi-occur.AddSelection",
+      "multi-occur.addSelection",
       AddSelections
     ),
     vscode.commands.registerTextEditorCommand(
-      "multi-occur.NextOccurence",
+      "multi-occur.nextOccurence",
       nextOccurence
     ),
     vscode.commands.registerTextEditorCommand(
-      "multi-occur.ToggleOccurence",
+      "multi-occur.prevOccurence",
+      prevOccurence
+    ),
+    vscode.commands.registerTextEditorCommand(
+      "multi-occur.toggleOccurence",
       toggleOccurence
     ),
     vscode.commands.registerTextEditorCommand(
-      "multi-occur.RemoveOccurences",
+      "multi-occur.removeOccurences",
       removeOccurences
     ),
     vscode.commands.registerTextEditorCommand(
-      "multi-occur.CreateCursors",
+      "multi-occur.createCursors",
       createCursors
     ),
     vscode.commands.registerTextEditorCommand(
-      "multi-occur.FindOccurences",
+      "multi-occur.findOccurences",
       findOccurences
     )
   );
