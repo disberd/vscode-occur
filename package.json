@@ -1,11 +1,18 @@
 {
-  "name": "occur",
-  "displayName": "Occur",
+  "name": "multi-occur",
+  "displayName": "Multi Occur",
   "description": "Add Cursors to occurences of target text in selected portions of a document",
-  "version": "0.0.1",
+    "publisher": "disberd",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.45.0"
+  }, 
+   "repository": {
+    "type": "git",
+    "url": "https://github.com/disberd/vscode-multi-multi-occur.git"
   },
+  "icon": "./img/icon.png",
+  "homepage": "https://github.com/disberd/vscode-multi-occur",
   "categories": [
     "Other"
   ],
@@ -16,68 +23,68 @@
   "contributes": {
     "commands": [
       {
-        "command": "occur.RemoveSelections",
-        "title": "Occur: Remove Selections"
+        "command": "multi-occur.RemoveSelections",
+        "title": "Multi Occur: Remove Selections"
       },
       {
-        "command": "occur.ToggleOccurence",
-        "title": "Occur: Toggle Occurrence"
+        "command": "multi-occur.ToggleOccurence",
+        "title": "Multi Occur: Toggle Occurrence"
       },
       {
-        "command": "occur.NextOccurence",
-        "title": "Occur: Next Occurrence"
+        "command": "multi-occur.NextOccurence",
+        "title": "Multi Occur: Next Occurrence"
       },
       {
-        "command": "occur.RemoveOccurences",
-        "title": "Occur: Remove Occurrences"
+        "command": "multi-occur.RemoveOccurences",
+        "title": "Multi Occur: Remove Occurrences"
       },
       {
-        "command": "occur.CreateCursors",
-        "title": "Occur: Create Cursors"
+        "command": "multi-occur.CreateCursors",
+        "title": "Multi Occur: Create Cursors"
       },
       {
-        "command": "occur.FindOccurences",
-        "title": "Occur: Find Occurences"
+        "command": "multi-occur.FindOccurences",
+        "title": "Multi Occur: Find Occurences"
       },
       {
-        "command": "occur.AddSelection",
-        "title": "Occur: Add Selections"
+        "command": "multi-occur.AddSelection",
+        "title": "Multi Occur: Add Selections"
       }
     ],
     "keybindings": [
       {
         "key": "Escape",
-        "command": "occur.RemoveSelections",
-        "when": "!editorHasMultipleSelections && occur.active_region && !occur.active_occur && vim.mode == Normal"
+        "command": "multi-occur.RemoveSelections",
+        "when": "!editorHasMultipleSelections && multi-occur.active_region && !multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "Escape",
-        "command": "occur.RemoveOccurences",
-        "when": "!editorHasMultipleSelections && occur.active_occur && vim.mode == Normal"
+        "command": "multi-occur.RemoveOccurences",
+        "when": "!editorHasMultipleSelections && multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "Tab",
-        "command": "occur.ToggleOccurence",
-        "when": "occur.active_occur && vim.mode == Normal"
+        "command": "multi-occur.ToggleOccurence",
+        "when": "multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "n",
-        "command": "occur.NextOccurence",
-        "when": "occur.active_occur && vim.mode == Normal"
+        "command": "multi-occur.NextOccurence",
+        "when": "multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "Enter",
-        "command": "occur.CreateCursors",
-        "when": "occur.active_occur && vim.mode == Normal"
+        "command": "multi-occur.CreateCursors",
+        "when": "multi-occur.active_occur && vim.mode == Normal"
       },
       {
         "key": "Enter",
-        "command": "occur.FindOccurences",
+        "command": "multi-occur.FindOccurences",
         "when": "vim.mode == Visual"
       },
       {
         "key": "Shift+Space",
-        "command": "occur.AddSelection",
+        "command": "multi-occur.AddSelection",
         "when": "vim.mode == Visual || vim.mode == VisualLine"
       }
     ]

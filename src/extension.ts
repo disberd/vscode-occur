@@ -8,7 +8,7 @@ import { start } from "repl";
 let prova: DocVal = new DocVal();
 
 // Variable to store the selections ranges for the various documents
-var madonna: { [k: string]: DocVal } = {};
+var docvals_vec: { [k: string]: DocVal } = {};
 
 // Define the decoration for the selected text
 const decorSelec = vscode.window.createTextEditorDecorationType({
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
     textEditorEdit: vscode.TextEditorEdit
   ) {
     var sel = textEditor.selections;
-    let arr = madonna[textEditor.document.fileName];
+    let arr = docvals_vec[textEditor.document.fileName];
     sel.forEach((element) => {
       arr.selection_range.push({
         range: new vscode.Range(element.start, element.end),
@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
   ) {
     let doc = textEditor.document;
     // Get the relevant DocVal array
-    let arr = madonna[doc.fileName];
+    let arr = docvals_vec[doc.fileName];
     if (!arr.occurences.length) {
       return;
     }
@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
     textEditorEdit: vscode.TextEditorEdit
   ) {
     let doc = textEditor.document;
-    let arr = madonna[doc.fileName];
+    let arr = docvals_vec[doc.fileName];
     if (!arr.occurences.length) {
       return;
     }
@@ -107,7 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
     textEditorEdit: vscode.TextEditorEdit
   ) {
     let doc = textEditor.document;
-    let arr = madonna[doc.fileName];
+    let arr = docvals_vec[doc.fileName];
     if (!arr.occurences.length) {
       return;
     }
@@ -128,7 +128,7 @@ export function activate(context: vscode.ExtensionContext) {
     textEditorEdit: vscode.TextEditorEdit
   ) {
     let doc = textEditor.document;
-    let arr = madonna[doc.fileName];
+    let arr = docvals_vec[doc.fileName];
     if (!arr.occurences.length) {
       return;
     }
@@ -149,7 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
     let doc = textEditor.document;
     let sel = textEditor.selection;
     let range = new vscode.Range(sel.start, sel.end);
-    let arr = madonna[doc.fileName];
+    let arr = docvals_vec[doc.fileName];
     if (range.isEmpty) {
       // Prompt for search term using word under cursor default
       let word = doc.getText(doc.getWordRangeAtPosition(range.start));
@@ -178,10 +178,11 @@ export function activate(context: vscode.ExtensionContext) {
       sel_range.forEach((element) => {
         let offset = doc.offsetAt(element.range.start);
         let text = doc.getText(element.range);
-        while (pattern.test(text) == true) {
+        let match
+        while (match = pattern.exec(text)) {
           let occ_end = doc.positionAt(pattern.lastIndex + offset);
           let occ_start = doc.positionAt(
-            pattern.lastIndex + offset - pattern.source.length
+            pattern.lastIndex + offset - match[0].length
           );
           arr.occurences.push(new vscode.Range(occ_start, occ_end));
         }
@@ -198,7 +199,7 @@ export function activate(context: vscode.ExtensionContext) {
     textEditor: vscode.TextEditor,
     textEditorEdit: vscode.TextEditorEdit
   ) {
-    let arr = madonna[textEditor.document.fileName];
+    let arr = docvals_vec[textEditor.document.fileName];
     arr.clearSelection();
     textEditor.setDecorations(decorSelec, arr.selection_range);
     // Remove the selection context
@@ -211,31 +212,31 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerTextEditorCommand(
-      "occur.RemoveSelections",
+      "multi-occur.RemoveSelections",
       removeSelections
     ),
     vscode.commands.registerTextEditorCommand(
-      "occur.AddSelection",
+      "multi-occur.AddSelection",
       AddSelections
     ),
     vscode.commands.registerTextEditorCommand(
-      "occur.NextOccurence",
+      "multi-occur.NextOccurence",
       nextOccurence
     ),
     vscode.commands.registerTextEditorCommand(
-      "occur.ToggleOccurence",
+      "multi-occur.ToggleOccurence",
       toggleOccurence
     ),
     vscode.commands.registerTextEditorCommand(
-      "occur.RemoveOccurences",
+      "multi-occur.RemoveOccurences",
       removeOccurences
     ),
     vscode.commands.registerTextEditorCommand(
-      "occur.CreateCursors",
+      "multi-occur.CreateCursors",
       createCursors
     ),
     vscode.commands.registerTextEditorCommand(
-      "occur.FindOccurences",
+      "multi-occur.FindOccurences",
       findOccurences
     )
   );
@@ -257,19 +258,19 @@ export function deactivate() {}
 function onTextEditorChange(textEditor: vscode.TextEditor | undefined): any {
   if (textEditor) {
     let id = textEditor.document.fileName;
-    if (!madonna[id]) {
-      madonna[id] = new DocVal();
+    if (!docvals_vec[id]) {
+      docvals_vec[id] = new DocVal();
       setSelecContext(false);
       setOccurContext(false);
     } else {
-      if (madonna[id].selection_range.length) {
-        textEditor.setDecorations(decorSelec, madonna[id].selection_range);
+      if (docvals_vec[id].selection_range.length) {
+        textEditor.setDecorations(decorSelec, docvals_vec[id].selection_range);
         setSelecContext(true);
       } else {
         setSelecContext(false);
       }
-      if (madonna[id].selection_range.length) {
-        textEditor.setDecorations(decorOccur, madonna[id].occurences);
+      if (docvals_vec[id].selection_range.length) {
+        textEditor.setDecorations(decorOccur, docvals_vec[id].occurences);
         setOccurContext(true);
       } else {
         setOccurContext(false);
@@ -283,8 +284,8 @@ function newCursorSelection(range: vscode.Range): vscode.Selection {
 }
 
 function setSelecContext(value: boolean) {
-  vscode.commands.executeCommand("setContext", "occur.active_region", value);
+  vscode.commands.executeCommand("setContext", "multi-occur.active_region", value);
 }
 function setOccurContext(value: boolean) {
-  vscode.commands.executeCommand("setContext", "occur.active_occur", value);
+  vscode.commands.executeCommand("setContext", "multi-occur.active_occur", value);
 }
