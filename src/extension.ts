@@ -7,6 +7,13 @@ import { start } from "repl";
 
 let prova: DocVal = new DocVal();
 
+// Variables to understand context
+var active_occur: boolean
+var active_region: boolean
+
+// variable for the status bar field
+let myStatusBarItem: vscode.StatusBarItem;
+
 // Variable to store the selections ranges for the various documents
 var docvals_vec: { [k: string]: DocVal } = {};
 
@@ -26,6 +33,10 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "occur" is now active!');
+
+  // create a new status bar item that we can now manage
+  myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 200);
+  context.subscriptions.push(myStatusBarItem)
 
   // Function that add the currently selected text to the highlighted region for variable search
   function AddSelections(
@@ -69,14 +80,14 @@ export function activate(context: vscode.ExtensionContext) {
       occurIdx = 0;
     }
     // Invert the index as we computed it reversing the array
-    occurIdx = endOffsets.length - 1 - occurIdx
+    occurIdx = endOffsets.length - 1 - occurIdx;
     // Move the cursor to the beginning of the next occurence
     textEditor.selection = new vscode.Selection(
       arr.occurences[occurIdx].start,
       arr.occurences[occurIdx].start
-	);
-	// Move the editor view if next occurrence is not visible
-	textEditor.revealRange(arr.occurences[occurIdx])
+    );
+    // Move the editor view if next occurrence is not visible
+    textEditor.revealRange(arr.occurences[occurIdx]);
   }
 
   // Function to move the cursor to the next occurence
@@ -107,9 +118,9 @@ export function activate(context: vscode.ExtensionContext) {
     textEditor.selection = new vscode.Selection(
       arr.occurences[occurIdx].start,
       arr.occurences[occurIdx].start
-	);
-	// Move the editor view if next occurrence is not visible
-	textEditor.revealRange(arr.occurences[occurIdx])
+    );
+    // Move the editor view if next occurrence is not visible
+    textEditor.revealRange(arr.occurences[occurIdx]);
   }
 
   // Function to toggle the occurrence under cursor
@@ -169,9 +180,9 @@ export function activate(context: vscode.ExtensionContext) {
     }
     arr.occurences = [];
     // Update the decorations
-	textEditor.setDecorations(decorOccur, arr.occurences);
-	// Update the context
-	setOccurContext(false)
+    textEditor.setDecorations(decorOccur, arr.occurences);
+    // Update the context
+    setOccurContext(false);
   }
 
   const test = vscode.workspace.getConfiguration("vim");
@@ -213,8 +224,8 @@ export function activate(context: vscode.ExtensionContext) {
       sel_range.forEach((element) => {
         let offset = doc.offsetAt(element.range.start);
         let text = doc.getText(element.range);
-        let match
-        while (match = pattern.exec(text)) {
+        let match;
+        while ((match = pattern.exec(text))) {
           let occ_end = doc.positionAt(pattern.lastIndex + offset);
           let occ_start = doc.positionAt(
             pattern.lastIndex + offset - match[0].length
@@ -280,11 +291,17 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  vscode.window.onDidChangeActiveTextEditor(
-    onTextEditorChange,
-    null,
-    context.subscriptions
+  // Push event listeners
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(onTextEditorChange),
+    vscode.window.onDidChangeTextEditorSelection(updateStatusBar)
   );
+
+  // vscode.window.onDidChangeActiveTextEditor(
+  //   onTextEditorChange,
+  //   null,
+  //   context.subscriptions
+  // );
 
   if (vscode.window.activeTextEditor) {
     onTextEditorChange(vscode.window.activeTextEditor);
@@ -295,27 +312,30 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {}
 
 function onTextEditorChange(textEditor: vscode.TextEditor | undefined): any {
-  if (textEditor) {
-    let id = textEditor.document.fileName;
-    if (!docvals_vec[id]) {
-      docvals_vec[id] = new DocVal();
-      setSelecContext(false);
-      setOccurContext(false);
-    } else {
-      if (docvals_vec[id].selection_range.length) {
-        textEditor.setDecorations(decorSelec, docvals_vec[id].selection_range);
-        setSelecContext(true);
-      } else {
-        setSelecContext(false);
-      }
-      if (docvals_vec[id].selection_range.length) {
-        textEditor.setDecorations(decorOccur, docvals_vec[id].occurences);
-        setOccurContext(true);
-      } else {
-        setOccurContext(false);
-      }
-    }
+  if (!textEditor) {
+    return;
   }
+  let docval = selecDocVal(textEditor);
+  if (docval.selection_range.length) {
+    textEditor.setDecorations(decorSelec, docval.selection_range);
+    setSelecContext(true);
+  } else {
+    setSelecContext(false);
+  }
+  if (docval.selection_range.length) {
+    textEditor.setDecorations(decorOccur, docval.occurences);
+    setOccurContext(true);
+  } else {
+    setOccurContext(false);
+  }
+}
+
+function selecDocVal(t: vscode.TextEditor): DocVal {
+  let id = t.document.fileName;
+  if (!docvals_vec[id]) {
+    docvals_vec[id] = new DocVal();
+  }
+  return docvals_vec[id];
 }
 
 function newCursorSelection(range: vscode.Range): vscode.Selection {
@@ -323,10 +343,40 @@ function newCursorSelection(range: vscode.Range): vscode.Selection {
 }
 
 function setSelecContext(value: boolean) {
-  vscode.commands.executeCommand("setContext", "multi-occur.active_region", value);
+  active_region = value
+  vscode.commands.executeCommand(
+    "setContext",
+    "multi-occur.active_region",
+    value
+  );
 }
 function setOccurContext(value: boolean) {
-  vscode.commands.executeCommand("setContext", "multi-occur.active_occur", value);
+  if (!value){
+    myStatusBarItem.hide()
+  }
+  active_occur = value
+  vscode.commands.executeCommand(
+    "setContext",
+    "multi-occur.active_occur",
+    value
+  );
+}
+function updateStatusBar(t: vscode.TextEditorSelectionChangeEvent) {
+  if (!active_occur) {
+      myStatusBarItem.hide();
+    return
+  }
+  let docval = selecDocVal(t.textEditor)
+  let curPos = t.textEditor.selection.active
+    let occurIdx = docval.occurences.findIndex(function (val) {
+      return val.contains(curPos);
+    });
+    if (occurIdx != -1) {
+      myStatusBarItem.text = `O: ${occurIdx+1}/${docval.occurences.length}`
+      myStatusBarItem.show()
+    } else {
+      myStatusBarItem.hide()
+    }
 }
 
 function escapeRegExp(string: string): string {
