@@ -2,12 +2,12 @@
   "name": "multi-occur",
   "displayName": "Multi Occur",
   "description": "Add Cursors to occurences of target text in selected portions of a document",
-    "publisher": "disberd",
-  "version": "0.0.2",
+  "publisher": "disberd",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.45.0"
-  }, 
-   "repository": {
+  },
+  "repository": {
     "type": "git",
     "url": "https://github.com/disberd/vscode-multi-occur.git"
   },
