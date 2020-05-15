@@ -199,7 +199,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (!word) {
         return;
       }
-      let pattern = new RegExp(word, "gm");
+      let pattern = new RegExp(escapeRegExp(word), "gm");
       let sel_range = arr.selection_range;
       if (!sel_range.length) {
         // Search in the whole document
@@ -327,4 +327,8 @@ function setSelecContext(value: boolean) {
 }
 function setOccurContext(value: boolean) {
   vscode.commands.executeCommand("setContext", "multi-occur.active_occur", value);
+}
+
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
